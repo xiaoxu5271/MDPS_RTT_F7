@@ -1,0 +1,14 @@
+
+from building import *
+import rtconfig
+
+cwd     = GetCurrentDir()
+src     = Glob('src/*.c')
+CPPPATH = [cwd + '/inc']
+
+
+group = DefineGroup('deca_driver', src, depend = [''], CPPPATH = CPPPATH)
+
+
+Return('group')
+
