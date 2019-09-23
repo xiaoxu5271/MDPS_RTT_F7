@@ -43,7 +43,8 @@ uint8_t s_pwr = 0;
 unsigned long pwr_val = 0x1f1f1f1f;
 //uint8_t s_pwr = 1;
 //unsigned long pwr_val = 0x15355575;
-uint8_t anchor_mode = 0;
+//
+uint8_t anchor_mode = 1;
 uint16_t sync_period = 500;
 uint16_t range_period = 1000 * 5;
 //uint8_t resp_slot = 3;
@@ -616,9 +617,9 @@ static void print_task(void *p)
             // memcpy(msg_send.buf, root_str, strlen(root_str) + 1);
             rt_free(root_str);
 
-            if (strcmp(s_addr_tem, "0302") == 0)
-                // if (p_Msg.msg_type == 4)
-                rt_kprintf("%s\n", uart_send.buf);
+            // if (strcmp(s_addr_tem, "0302") == 0)
+            // if (p_Msg.msg_type == 4)
+            // rt_kprintf("%s\n", uart_send.buf);
             // rt_kprintf("msg_send:%s\n", msg_send.buf);
             rt_mq_send(&message_send, (void *)&msg_send, sizeof(msg_send));
         }

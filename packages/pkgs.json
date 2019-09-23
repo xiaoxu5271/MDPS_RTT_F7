@@ -1,0 +1,52 @@
+[
+ {
+  "path": "/packages/iot/webclient", 
+  "ver": "v2.0.1", 
+  "name": "WEBCLIENT"
+ }, 
+ {
+  "path": "/packages/iot/webnet", 
+  "ver": "latest", 
+  "name": "WEBNET"
+ }, 
+ {
+  "path": "/packages/iot/WiFi/rw007", 
+  "ver": "latest", 
+  "name": "RW007"
+ }, 
+ {
+  "path": "/packages/iot/netutils", 
+  "ver": "latest", 
+  "name": "NETUTILS"
+ }, 
+ {
+  "path": "/packages/iot/ota_downloader", 
+  "ver": "latest", 
+  "name": "OTA_DOWNLOADER"
+ }, 
+ {
+  "path": "/packages/iot/airkissOpen", 
+  "ver": "latest", 
+  "name": "AIRKISS_OPEN"
+ }, 
+ {
+  "path": "/packages/system/fal", 
+  "ver": "latest", 
+  "name": "FAL"
+ }, 
+ {
+  "path": "/packages/system/littlefs", 
+  "ver": "latest", 
+  "name": "LITTLEFS"
+ }, 
+ {
+  "path": "/packages/peripherals/at24cxx", 
+  "ver": "latest", 
+  "name": "AT24CXX"
+ }, 
+ {
+  "path": "/packages/misc/samples/filesystem_samples", 
+  "ver": "latest", 
+  "name": "FILESYSTEM_SAMPLES"
+ }
+]

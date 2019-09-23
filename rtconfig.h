@@ -90,6 +90,10 @@
 #define RT_USING_SERIAL
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_CPUTIME
+#define RT_USING_CPUTIME_CORTEXM
+#define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
 #define RT_USING_PIN
 #define RT_USING_MTD_NOR
 #define RT_USING_RTC
@@ -266,6 +270,9 @@
 #define PKG_USING_HTTP_OTA
 #define PKG_HTTP_OTA_URL "http://xxx/xxx/rtthread.rbl"
 #define PKG_USING_OTA_DOWNLOADER_LATEST_VERSION
+#define PKG_USING_AIRKISS_OPEN
+#define AIRKISS_OPEN_DEMO_ENABLE
+#define PKG_USING_AKO_Vlast
 
 /* security packages */
 
@@ -300,6 +307,8 @@
 
 /* peripheral libraries and drivers */
 
+#define PKG_USING_AT24CXX
+#define PKG_USING_AT24CXX_LATEST_VERSION
 
 /* miscellaneous packages */
 
@@ -333,6 +342,9 @@
 #define BSP_USING_SPI1
 #define BSP_USING_SPI2
 #define BSP_USING_SPI3
+#define BSP_USING_I2C1
+#define BSP_I2C1_SCL_PIN 22
+#define BSP_I2C1_SDA_PIN 23
 #define BSP_USING_ONCHIP_RTC
 #define BSP_RTC_USING_LSE
 
