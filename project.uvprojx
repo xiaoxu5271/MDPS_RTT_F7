@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F767xx, LFS_CONFIG=lfs_config.h, USE_HAL_DRIVER, RT_USING_ARM_LIBC</Define>
               <Undefine></Undefine>
-              <IncludePath>.;rt-thread\include;applications;.;board;board\CubeMX_Config\Inc;board\ports;libraries\HAL_Drivers;libraries\HAL_Drivers\config;libraries\HAL_Drivers\drv_flash;deca_application\inc;deca_driver\inc;packages\airkissOpen-latest;packages\at24cxx-latest;packages\fal-latest\inc;packages\filesystem_samples-latest;packages\littlefs-latest;packages\netutils-latest\ntp;packages\netutils-latest\tftp;.;packages\ota_downloader-latest;packages\rw007-latest;packages\rw007-latest\inc;packages\webclient-v2.0.1\inc;packages\webnet-latest\inc;USER\inc;rt-thread\libcpu\arm\common;rt-thread\libcpu\arm\cortex-m4;rt-thread\components\dfs\include;rt-thread\components\dfs\filesystems\devfs;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\spi;rt-thread\components\drivers\include;rt-thread\components\drivers\spi\sfud\inc;rt-thread\components\drivers\include;rt-thread\components\drivers\wlan;rt-thread\components\finsh;rt-thread\components\libc\compilers\armlibc;rt-thread\components\libc\compilers\common;rt-thread\components\net\lwip-2.1.0\src;rt-thread\components\net\lwip-2.1.0\src\include;rt-thread\components\net\lwip-2.1.0\src\arch\include;rt-thread\components\net\lwip-2.1.0\src\include\netif;rt-thread\components\net\netdev\include;rt-thread\components\net\sal_socket\include;rt-thread\components\net\sal_socket\include\socket;rt-thread\components\net\sal_socket\impl;rt-thread\components\net\sal_socket\include\dfs_net;rt-thread\components\net\sal_socket\include\dfs_net\sys_select;rt-thread\components\net\sal_socket\include\socket\sys_socket;libraries\STM32F7xx_HAL\STM32F7xx_HAL_Driver\Inc;libraries\STM32F7xx_HAL\CMSIS\Device\ST\STM32F7xx\Include;libraries\STM32F7xx_HAL\CMSIS\Include</IncludePath>
+              <IncludePath>.;rt-thread\include;applications;.;board;board\CubeMX_Config\Inc;board\ports;libraries\HAL_Drivers;libraries\HAL_Drivers\config;libraries\HAL_Drivers\drv_flash;deca_application\inc;deca_driver\inc;packages\airkissOpen-latest;packages\at24cxx-latest;packages\fal-latest\inc;packages\filesystem_samples-latest;packages\littlefs-latest;packages\netutils-latest\ntp;packages\netutils-latest\telnet;packages\netutils-latest\tftp;.;packages\ota_downloader-latest;packages\rw007-latest;packages\rw007-latest\inc;packages\webclient-v2.0.1\inc;packages\webnet-latest\inc;USER\inc;rt-thread\libcpu\arm\common;rt-thread\libcpu\arm\cortex-m4;rt-thread\components\dfs\include;rt-thread\components\dfs\filesystems\devfs;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\include;rt-thread\components\drivers\spi;rt-thread\components\drivers\include;rt-thread\components\drivers\spi\sfud\inc;rt-thread\components\drivers\include;rt-thread\components\drivers\wlan;rt-thread\components\finsh;rt-thread\components\libc\compilers\armlibc;rt-thread\components\libc\compilers\common;rt-thread\components\net\lwip-2.1.0\src;rt-thread\components\net\lwip-2.1.0\src\include;rt-thread\components\net\lwip-2.1.0\src\arch\include;rt-thread\components\net\lwip-2.1.0\src\include\netif;rt-thread\components\net\netdev\include;rt-thread\components\net\sal_socket\include;rt-thread\components\net\sal_socket\include\socket;rt-thread\components\net\sal_socket\impl;rt-thread\components\net\sal_socket\include\dfs_net;rt-thread\components\net\sal_socket\include\dfs_net\sys_select;rt-thread\components\net\sal_socket\include\socket\sys_socket;libraries\STM32F7xx_HAL\STM32F7xx_HAL_Driver\Inc;libraries\STM32F7xx_HAL\CMSIS\Device\ST\STM32F7xx\Include;libraries\STM32F7xx_HAL\CMSIS\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -742,6 +742,11 @@
               <FilePath>packages\netutils-latest\ntp\ntp.c</FilePath>
             </File>
             <File>
+              <FileName>telnet.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\netutils-latest\telnet\telnet.c</FilePath>
+            </File>
+            <File>
               <FileName>tftp_client.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\netutils-latest\tftp\tftp_client.c</FilePath>
@@ -906,6 +911,11 @@
               <FilePath>packages\webnet-latest\src\wn_module.c</FilePath>
             </File>
             <File>
+              <FileName>md5.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\webnet-latest\src\md5.c</FilePath>
+            </File>
+            <File>
               <FileName>wn_module_asp.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\webnet-latest\module\wn_module_asp.c</FilePath>
@@ -966,6 +976,11 @@
               <FilePath>USER\src\cJSON.c</FilePath>
             </File>
             <File>
+              <FileName>cJSON_Parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>USER\src\cJSON_Parse.c</FilePath>
+            </File>
+            <File>
               <FileName>cpu_usage.c</FileName>
               <FileType>1</FileType>
               <FilePath>USER\src\cpu_usage.c</FilePath>
@@ -981,19 +996,24 @@
               <FilePath>USER\src\dw1000_usr.c</FilePath>
             </File>
             <File>
+              <FileName>eeprom_var.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>USER\src\eeprom_var.c</FilePath>
+            </File>
+            <File>
               <FileName>http_send.c</FileName>
               <FileType>1</FileType>
               <FilePath>USER\src\http_send.c</FilePath>
             </File>
             <File>
+              <FileName>net_app.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>USER\src\net_app.c</FilePath>
+            </File>
+            <File>
               <FileName>udp_send.c</FileName>
               <FileType>1</FileType>
               <FilePath>USER\src\udp_send.c</FilePath>
-            </File>
-            <File>
-              <FileName>wlan_app.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>USER\src\wlan_app.c</FilePath>
             </File>
           </Files>
         </Group>

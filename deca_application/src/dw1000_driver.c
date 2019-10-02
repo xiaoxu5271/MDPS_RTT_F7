@@ -25,7 +25,7 @@
 
 extern uint16_t dev_panid;
 extern uint8_t s_pwr;
-extern unsigned long pwr_val;
+extern uint64_t pwr_val;
 instance_data_t instance_data;
 
 #ifdef ANCHOR_MODE

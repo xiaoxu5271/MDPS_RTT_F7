@@ -10,23 +10,31 @@
 
 #include <dw1000_usr.h>
 #include <cJSON.h>
-
+#include "net_app.h"
 #include <rtdbg.h>
 
 #define GET_HEADER_BUFSZ 1024
 #define GET_REV_BUF_SIZE 1024
 
-const char *test_uri = "http://192.168.1.8:8080/netlog?data=";
+//http用参数
+uint8_t http_ip[16] = "192.168.1.8";
+uint8_t http_port[5] = "8080";
+uint8_t http_heart_uri[64]; //"http://192.168.1.8:8080/netlog?data="
+uint8_t http_noresp_uri[64];
+#define equip_model "Ubitrack_A_v1.0.0"
+
+//心跳包用定时
+static rt_timer_t timer1;
+static rt_sem_t dynamic_sem = RT_NULL; //心跳定时用信号量
+uint32_t heart_tick = (60 * 1000);     //心跳时间 单位：ms
 
 void anchor_tick_str(char *pdst);
 void cmd_return_str(char *pdst);
 void cmd_devid_str(char *pdst);
 char buf[512];
-//test
-char url_tick[512];
+
 char url_cmd_return[256];
 char url_devid[256];
-char data[1024];
 
 static int send_http_get(const char *uri, unsigned char *buf, int *len)
 {
@@ -115,14 +123,16 @@ __exit:
 }
 //-----------------------------------------------------
 
-void send_http_get_test(void *arg)
+void http_get_task(void *arg)
 {
     int cnt = 0;
     int ret = 0;
     int len;
-    anchor_tick_str(data);
-    sprintf(url_tick, "%s%s", test_uri, data);
+    char data[512];
+    char url_tick[600];
+    static rt_err_t result;
 
+    rt_snprintf(http_heart_uri, sizeof(http_heart_uri), "http://%s:%s/netlog?data=", http_ip, http_port);
     // cmd_return_str(data);
     // sprintf(url_cmd_return, "%s%s", test_uri, data);
     // cmd_devid_str(data);
@@ -132,97 +142,140 @@ void send_http_get_test(void *arg)
     //rt_kprintf("url");
     while (1)
     {
-
-        // switch (cnt)
-        // {
-        // case 0:
-        // 	ret = send_http_get(url_tick, buf, &len);
-        // 	cnt++;
-        // 	break;
-        // case 1:
-        // 	ret = send_http_get(url_cmd_return, buf, &len);
-        // 	cnt++;
-        // 	break;
-        // case 2:
-        // 	ret = send_http_get(url_devid, buf, &len);
-        // 	cnt++;
-        // 	break;
-        // default:
-        // 	break;
-        // }
-
-        ret = send_http_get(url_tick, buf, &len);
-        if (ret == RT_EOK)
+        result = rt_sem_take(dynamic_sem, RT_WAITING_FOREVER);
+        if (result == RT_EOK)
         {
-            rt_kprintf("get data:%s", buf);
+            rt_kprintf("Datanum = %d\n", Datanum);
+            anchor_tick_str(data);
+            rt_snprintf(url_tick, sizeof(url_tick), "%s%s", http_heart_uri, data);
+            rt_kprintf("url_tick:\n%s\n", url_tick);
+            ret = send_http_get(url_tick, buf, &len);
+            if (ret == RT_EOK)
+            {
+                rt_kprintf("get data:%s", buf);
+            }
         }
-        // if (cnt >= 3)
-        // 	cnt = 0;
-
-        rt_thread_mdelay(10 * 1000);
+        else
+        {
+            rt_kprintf("rt_sem_take fail!\n");
+        }
+        Datanum = 0;
     }
 }
 
-static void start_http_get(int argc, char **argv)
+/* 定时器 1 超时函数 */
+static void timeout1(void *parameter)
 {
+    rt_sem_release(dynamic_sem);
+    // rt_kprintf("periodic timer is timeout!\n");
+}
+
+/*获取 忽略标签列表 */
+void noresp_get_task(void *arg)
+{
+    uint16_t sleep_time = 400; //延时时间 ms
+    int ret = 0;
+    int len;
+    rt_snprintf(http_noresp_uri, sizeof(http_noresp_uri), "http://%s:%s/nolist?serial=%s", http_ip, http_port, dev_address_str);
+    rt_kprintf("http_noresp_uri:\n%s\n", http_noresp_uri);
+    while (1)
+    {
+        ret = send_http_get(http_noresp_uri, buf, &len);
+        if (ret == RT_EOK)
+        {
+            // rt_kprintf("get data:%s", buf);
+        }
+        rt_thread_mdelay(sleep_time);
+    }
+}
+
+/*启动 http 相关任务 */
+void start_http_get(void)
+{
+    dynamic_sem = rt_sem_create("dsem", 0, RT_IPC_FLAG_FIFO); //创建信号量
     rt_thread_t tid;
-    tid = rt_thread_create("send_http_get_test",
-                           send_http_get_test, RT_NULL,
-                           2048, RT_THREAD_PRIORITY_MAX / 3, 20);
+    tid = rt_thread_create("http_get_task",
+                           http_get_task,
+                           RT_NULL,
+                           4096,
+                           RT_THREAD_PRIORITY_MAX / 2,
+                           20);
     if (tid != RT_NULL)
     {
         rt_thread_startup(tid);
     }
+
+    timer1 = rt_timer_create("timer1",
+                             timeout1,
+                             RT_NULL,
+                             heart_tick,
+                             RT_TIMER_FLAG_PERIODIC);
+
+    tid = rt_thread_create("noresp_get_task",
+                           noresp_get_task,
+                           RT_NULL,
+                           2048,
+                           20,
+                           20);
+    if (tid != RT_NULL)
+    {
+        // rt_thread_startup(tid);
+    }
+
     return;
 }
 
 void anchor_tick_str(char *pdst)
 {
+    char default_mac[18];
+    get_default_mac(default_mac);
+
     cJSON *root = RT_NULL,
-          *data = RT_NULL,
-          *data_obj = RT_NULL,
-          *data_obj_data1 = RT_NULL,
-          *data_obj_data2 = RT_NULL,
-          *data_obj_data3 = RT_NULL,
-          *data_obj_data4 = RT_NULL;
+          *data = RT_NULL;
+    //   *data_obj = RT_NULL,
+    //   *data_obj_data1 = RT_NULL,
+    //   *data_obj_data2 = RT_NULL,
+    //   *data_obj_data3 = RT_NULL,
+    //   *data_obj_data4 = RT_NULL;
 
     root = cJSON_CreateObject();
     data = cJSON_CreateObject();
-    data_obj = cJSON_CreateObject();
-    data_obj_data1 = cJSON_CreateObject();
-    data_obj_data2 = cJSON_CreateObject();
-    data_obj_data3 = cJSON_CreateObject();
-    data_obj_data4 = cJSON_CreateObject();
+    // data_obj = cJSON_CreateObject();
+    // data_obj_data1 = cJSON_CreateObject();
+    // data_obj_data2 = cJSON_CreateObject();
+    // data_obj_data3 = cJSON_CreateObject();
+    // data_obj_data4 = cJSON_CreateObject();
 
     cJSON_AddNumberToObject(data, "p", 66);
     cJSON_AddStringToObject(data, "exceptstr", "");
     cJSON_AddNumberToObject(data, "exceptnum", 0);
-    cJSON_AddNumberToObject(data, "datanum", 3229);
-    cJSON_AddStringToObject(data, "selfaddr", "a666");
+    cJSON_AddNumberToObject(data, "datanum", Datanum);
+    cJSON_AddStringToObject(data, "selfaddr", dev_address_str);
 
-    cJSON_AddNumberToObject(data_obj_data1, "a258", 112);
-    cJSON_AddItemToObject(data_obj, "1", data_obj_data1);
+    // cJSON_AddNumberToObject(data_obj_data1, "a258", 112);
+    // cJSON_AddItemToObject(data_obj, "1", data_obj_data1);
 
-    cJSON_AddNumberToObject(data_obj_data2, "0308", 463);
-    cJSON_AddNumberToObject(data_obj_data2, "0303", 463);
-    cJSON_AddNumberToObject(data_obj_data2, "a258", 58);
-    cJSON_AddNumberToObject(data_obj_data2, "0304", 467);
-    cJSON_AddNumberToObject(data_obj_data2, "0306", 421);
-    cJSON_AddItemToObject(data_obj, "2", data_obj_data2);
+    // cJSON_AddNumberToObject(data_obj_data2, "0308", 463);
+    // cJSON_AddNumberToObject(data_obj_data2, "0303", 463);
+    // cJSON_AddNumberToObject(data_obj_data2, "a258", 58);
+    // cJSON_AddNumberToObject(data_obj_data2, "0304", 467);
+    // cJSON_AddNumberToObject(data_obj_data2, "0306", 421);
+    // cJSON_AddItemToObject(data_obj, "2", data_obj_data2);
 
-    cJSON_AddNumberToObject(data_obj_data3, "0308", 463);
-    cJSON_AddNumberToObject(data_obj_data3, "0303", 463);
-    cJSON_AddNumberToObject(data_obj_data3, "a258", 58);
-    cJSON_AddItemToObject(data_obj, "3", data_obj_data3);
+    // cJSON_AddNumberToObject(data_obj_data3, "0308", 463);
+    // cJSON_AddNumberToObject(data_obj_data3, "0303", 463);
+    // cJSON_AddNumberToObject(data_obj_data3, "a258", 58);
+    // cJSON_AddItemToObject(data_obj, "3", data_obj_data3);
 
-    cJSON_AddNumberToObject(data_obj_data4, "0304", 467);
-    cJSON_AddItemToObject(data_obj, "4", data_obj_data4);
+    // cJSON_AddNumberToObject(data_obj_data4, "0304", 467);
+    // cJSON_AddItemToObject(data_obj, "4", data_obj_data4);
 
-    cJSON_AddItemToObject(data, "data_obj", data_obj);
+    // cJSON_AddItemToObject(data, "data_obj", data_obj);
     cJSON_AddItemToObject(root, "data", data);
 
-    cJSON_AddNumberToObject(root, "nowtime", 15);
-    cJSON_AddStringToObject(root, "mac", "aabbccddeeff");
+    cJSON_AddNumberToObject(root, "nowtime", 0);
+    cJSON_AddStringToObject(root, "mac", (const char *)default_mac);
+    cJSON_AddStringToObject(root, "eqm", equip_model);
 
     char *datas = cJSON_PrintUnformatted(root);
     // rt_kprintf("\n%s\n", datas);
@@ -283,4 +336,4 @@ void cmd_devid_str(char *pdst)
     rt_free(datas);
 }
 
-MSH_CMD_EXPORT(start_http_get, test send http get);
+// MSH_CMD_EXPORT(start_http_get, test send http get);

@@ -32,29 +32,23 @@ unsigned long slp_time;
 uint8_t range_type = TODA_RANGING;
 uint16_t static_fn;
 #endif
-//----------------------------------
-//需要定义的地方,test
-uint16_t dev_panid = 0x0411;
+//eeprom var
+char dev_address_str[5] = "a666";   //基站唯一地址 （字符格式）
+uint16_t dev_address;               //基站唯一地址 （数值格式）
+uint16_t dev_panid = 0x0411;        //分组名称
+uint8_t s_pwr = 0;                  //0手动设置功率，1为自动功率设置
+uint64_t pwr_val = 0x1f1f1f1f;      //手动设置功率值
+uint8_t anchor_mode = 1;            //0为从基站，1为主基站
+uint16_t sync_period = 500;         //TDOA主基站同步时间（ms）
+uint16_t range_period = 1000 * 5;   //基站自标定时间周期（ms）
+uint8_t resp_slot = 4;              //TWR定位基站返回序号(1-4) 隧道号
+uint8_t dev_speed = 1;              //SPI速率
+uint8_t dev_channel = 2;            //信道2为3.993G，信道5为6.489G；
+double dwt_prq_dealy_16m = 16498.0; //天线延时
+uint8_t cm_led = 1;
+//----------
 
-//uint16_t dev_address = 0xa67A;
-
-uint16_t dev_address = 0xa666;
-uint8_t s_pwr = 0;
-unsigned long pwr_val = 0x1f1f1f1f;
-//uint8_t s_pwr = 1;
-//unsigned long pwr_val = 0x15355575;
-//
-uint8_t anchor_mode = 1;
-uint16_t sync_period = 500;
-uint16_t range_period = 1000 * 5;
-//uint8_t resp_slot = 3;
-uint8_t resp_slot = 4;
-//uint8_t dev_speed = 1;
-//uint8_t dev_channel = 5;
-uint8_t dev_speed = 1;
-uint8_t dev_channel = 2;
-unsigned long dw1000_runtick = 0;
-
+uint64_t dw1000_runtick = 0;
 #ifdef ANCHOR_MODE
 //extern unsigned long nrf_irq_tick;
 unsigned long dw_irq_tick;
@@ -69,7 +63,6 @@ uint16_t no_resp_addr[NO_RESP_TAG_NUM] = {0};
 
 // double dwt_prq_dealy_16m = 515.9067;
 
-double dwt_prq_dealy_16m = 16498.0;
 //double dwt_prq_dealy_16m = 0;
 
 //extern OsiSyncObj_t dw1000_Semaphore;
@@ -93,6 +86,9 @@ struct rt_messagequeue message_print;
 struct rt_messagequeue print_data;
 struct rt_messagequeue message_send; //udp_send
 dw1000_debug_message_tag dw1000_debug_message;
+
+//心跳包用变量
+uint32_t Datanum = 0; //UWB总数据量
 
 void process_deca_irq(void *pvParameters);
 
@@ -443,7 +439,7 @@ static void dw1000_app_task(void *arg)
             else
             {
                 dwt_forcetrxoff(); //this will clear all events
-                rt_kprintf("test\r\n");
+                // rt_kprintf("test\r\n");
                 instance_data.testAppState = TA_RXE_WAIT;
             }
 
@@ -467,7 +463,6 @@ static void dw1000_tick_callback(void *parameter)
 
 void dw1000_tick_task(void)
 {
-
     timer1 = rt_timer_create("timer1", dw1000_tick_callback,
                              RT_NULL, 10,
                              RT_TIMER_FLAG_PERIODIC);
@@ -506,6 +501,10 @@ static void print_task(void *p)
     char s_addr_tem[5];
     char d_addr_tem[5];
     char rx_time_tem[11];
+
+    uint16_t lastno_n = 0;
+    uint8_t lastno_s[5];
+    bool lastno_flag = 0;
     // memset(uart_send_buff, 0, sizeof(uart_send_buff));
 
     while (1)
@@ -513,11 +512,7 @@ static void print_task(void *p)
         /* 从队列中获取内容 */
         if (rt_mq_recv(&message_print, &p_Msg, sizeof(p_Msg), RT_WAITING_FOREVER) == RT_EOK)
         {
-
-            // memset(uart_send.buf, 0, sizeof(uart_send.buf));
-            // memset(s_addr_tem, 0, sizeof(s_addr_tem));
-            // memset(d_addr_tem, 0, sizeof(d_addr_tem));
-            // memset(rx_time_tem, 0, sizeof(rx_time_tem));
+            Datanum++;
             snprintf(s_addr_tem, sizeof(s_addr_tem), "%04x", p_Msg.s_addr);                                      //s
             snprintf(d_addr_tem, sizeof(d_addr_tem), "%04x", p_Msg.d_addr);                                      //d
             snprintf(rx_time_tem, sizeof(rx_time_tem), "%02x%08x", (uint8_t)p_Msg.rx_time[1], p_Msg.rx_time[0]); //t
@@ -609,8 +604,29 @@ static void print_task(void *p)
             // memcpy(uart_send.buf, data_str, strlen(data_str) + 1);
             rt_free(data_str);
             cJSON_Delete(data);
-
             cJSON_AddStringToObject(root, "data", uart_send.buf);
+            //判断基站同步数据
+            if (p_Msg.msg_type == 0 || p_Msg.msg_type == 1)
+            {
+                lastno_n = p_Msg.sec_num;
+                rt_snprintf(lastno_s, sizeof(s_addr_tem), "%s", s_addr_tem);
+                lastno_flag = 1;
+            }
+            if (p_Msg.msg_type == 2 && lastno_flag == 1)
+            {
+                lastno_flag = 0;
+                cJSON *lastno = cJSON_CreateObject();
+                if (!lastno)
+                {
+                    rt_kprintf("No memory for cJSON lastno!\n");
+                    cJSON_Delete(lastno);
+                    continue;
+                    // return;
+                }
+                cJSON_AddNumberToObject(lastno, (const char *)lastno_s, lastno_n);
+                cJSON_AddItemToObject(root, "lastno", lastno);
+            }
+
             char *root_str = cJSON_PrintUnformatted(root);
             cJSON_Delete(root);
             msg_send.len = rt_sprintf(msg_send.buf, "%s", root_str);
@@ -637,6 +653,8 @@ void run_dw1000_task(void)
     dw1000_irq_lock = xSemaphoreCreateMutex();
     dw1000_irq_xSemaphore = xSemaphoreCreateBinary();
     */
+
+    // sscanf(dev_address_str, "%x", &dev_address);
     DW1000_init();
 
     dw1000_spi_mutex = rt_mutex_create("spi_mute", RT_IPC_FLAG_FIFO);

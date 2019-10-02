@@ -7,10 +7,10 @@
 #include <arpa/inet.h>
 #include <netdev.h> /* 当需要网卡操作时，需要包含这两个头文件 */
 
-#include "wlan_app.h"
+#include "net_app.h"
 
-#define WLAN_SSID "SmartWiFi-3704"
-#define WLAN_PASSWORD "12345678"
+#define WLAN_SSID "work-GN"
+#define WLAN_PASSWORD "work12345678"
 #define NET_READY_TIME_OUT (rt_tick_from_millisecond(15 * 1000))
 
 static rt_sem_t net_ready = RT_NULL;
@@ -89,19 +89,6 @@ rt_err_t wifi_connect(void)
         {
             rt_kprintf("wait ip got timeout!\n");
         }
-        // rt_wlan_unregister_event_handler(RT_WLAN_EVT_READY);
-        // rt_sem_delete(net_ready);
-
-        // rt_thread_delay(rt_tick_from_millisecond(5 * 1000));
-        // rt_kprintf("wifi disconnect test!\n");
-        // /* disconnect */
-        // result = rt_wlan_disconnect();
-        // if (result != RT_EOK)
-        // {
-        //     rt_kprintf("disconnect failed\n");
-        //     return result;
-        // }
-        // rt_kprintf("disconnect success\n");
     }
     else
     {
@@ -164,6 +151,52 @@ static int netdev_set_default_test(int argc, char **argv)
 
     rt_kprintf("set default network interface device(%s) success.\n", argv[1]);
     return 0;
+}
+
+void get_default_mac(char *mac_buf)
+{
+
+#define NETDEV_IFCONFIG_MAC_MAX_LEN 6
+
+    rt_ubase_t index;
+    rt_slist_t *node = RT_NULL;
+    struct netdev *netdev = RT_NULL;
+    struct netdev *cur_netdev_list = netdev_list;
+
+    if (cur_netdev_list == RT_NULL)
+    {
+        rt_kprintf("ifconfig: network interface device list error.\n");
+        return;
+    }
+
+    for (node = &(cur_netdev_list->list); node; node = rt_slist_next(node))
+    {
+        netdev = rt_list_entry(node, struct netdev, list);
+
+        // rt_kprintf("network interface device: %.*s%s\n",
+        //            RT_NAME_MAX, netdev->name,
+        //            (netdev == netdev_default) ? " (Default)" : "");
+        // rt_kprintf("MTU: %d\n", netdev->mtu);
+        if (netdev == netdev_default)
+        {
+            /* 6 - MAC address */
+            if (netdev->hwaddr_len == NETDEV_IFCONFIG_MAC_MAX_LEN)
+            {
+                rt_sprintf(mac_buf, "%02x:%02x:%02x:%02x:%02x:%02x",
+                           netdev->hwaddr[0],
+                           netdev->hwaddr[1],
+                           netdev->hwaddr[2],
+                           netdev->hwaddr[3],
+                           netdev->hwaddr[4],
+                           netdev->hwaddr[5]);
+                rt_kprintf("MAC: %s\n", mac_buf);
+                // for (index = 0; index < netdev->hwaddr_len; index++)
+                // {
+                //     rt_kprintf("%02x ", netdev->hwaddr[index]);
+                // }
+            }
+        }
+    }
 }
 
 #ifdef FINSH_USING_MSH

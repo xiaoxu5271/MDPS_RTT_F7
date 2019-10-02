@@ -211,7 +211,7 @@ uint8 anctxorrxreenable(uint16 sourceAddress, int ancToAncTWR)
       instance_data.delayedReplyTime += 2*(instance_data.fixedReplyDelayAnc >> 8); //to take into account W4R
       ancenablerx();
       type_pend = DWT_SIG_RX_PENDING ;
-      printf("send err\r\n");
+      // printf("send err\r\n");
     }
     else
     {

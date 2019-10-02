@@ -15,17 +15,18 @@
 
 #include "fal.h"
 #include <dfs_fs.h>
-#include "wlan_app.h"
+#include "net_app.h"
 #include "dw1000_usr.h"
+#include "http_send.h"
 // #include "drv_usr.h"
 #include <rtdbg.h>
 
 #define FS_PARTITION_NAME "filesystem"
 
 /* defined the LED0 pin: PF9 */
-#define LED0_PIN GET_PIN(F, 0)
-#define LED1_PIN GET_PIN(F, 1)
-#define LED2_PIN GET_PIN(F, 2)
+#define LED0_G_PIN GET_PIN(F, 0)
+#define LED1_R_PIN GET_PIN(F, 1)
+#define LED2_B_PIN GET_PIN(F, 2)
 
 #define APP_VERSION "V0.0.3"
 
@@ -33,13 +34,13 @@ int main(void)
 {
     struct rt_device *mtd_dev = RT_NULL;
     /* set LED0 pin mode to output */
-    rt_pin_mode(LED0_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(LED1_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED0_G_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED1_R_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED2_B_PIN, PIN_MODE_OUTPUT);
 
-    rt_pin_write(LED0_PIN, PIN_LOW);
-    rt_pin_write(LED1_PIN, PIN_LOW);
-    rt_pin_write(LED2_PIN, PIN_LOW);
+    rt_pin_write(LED0_G_PIN, PIN_LOW);
+    rt_pin_write(LED1_R_PIN, PIN_LOW);
+    rt_pin_write(LED2_B_PIN, PIN_LOW);
 
     fal_init();
     mtd_dev = fal_mtd_nor_device_create(FS_PARTITION_NAME);
@@ -69,21 +70,22 @@ int main(void)
             }
         }
     }
-    // DW1000_init();
+    AT24_READ_DEV_SET();
     // wifi_connect();
     run_dw1000_task();
-    // rt_wlan_config_autoreconnect(RT_TRUE); //开启自动重连
+    start_http_get();
+    rt_wlan_config_autoreconnect(RT_TRUE); //开启自动重连
     rt_kprintf("The current version of APP firmware is %s\n", APP_VERSION);
 
     while (1)
     {
-        rt_pin_write(LED0_PIN, PIN_HIGH);
-        rt_pin_write(LED1_PIN, PIN_HIGH);
-        rt_pin_write(LED2_PIN, PIN_HIGH);
-        rt_thread_mdelay(2);
-        rt_pin_write(LED0_PIN, PIN_LOW);
-        rt_pin_write(LED1_PIN, PIN_LOW);
-        rt_pin_write(LED2_PIN, PIN_LOW);
+        rt_pin_write(LED0_G_PIN, PIN_HIGH);
+        rt_pin_write(LED1_R_PIN, PIN_HIGH);
+        rt_pin_write(LED2_B_PIN, PIN_HIGH);
+        rt_thread_mdelay(10);
+        rt_pin_write(LED0_G_PIN, PIN_LOW);
+        rt_pin_write(LED1_R_PIN, PIN_LOW);
+        rt_pin_write(LED2_B_PIN, PIN_LOW);
         rt_thread_mdelay(1000);
         // rt_pin_write(LED0_PIN, PIN_LOW);
         // rt_pin_write(LED1_PIN, PIN_LOW);

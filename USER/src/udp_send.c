@@ -23,8 +23,8 @@
 
 #if 0
 //lch add
-#define UDP_SERVER_PORT 6666
-#define UDP_SERVER_IP "192.168.1.102"
+#define UDP_SERVER_PORT 3005
+#define UDP_SERVER_IP "192.168.1.8"
 //test
 #else
 #define UDP_SERVER_PORT 3005

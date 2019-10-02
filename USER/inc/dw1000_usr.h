@@ -13,7 +13,24 @@ extern uint16_t no_resp_addr[NO_RESP_TAG_NUM];
 
 extern unsigned long dw1000_irq_tick;
 
-//#define    delay_ms(X) delay_ms(X)
+extern uint32_t Datanum; //UWB总数据量
+
+//eeprom var
+extern char dev_address_str[5];  //基站唯一地址 （字符格式）
+extern uint16_t dev_address;     //基站唯一地址 （数值格式）
+extern uint16_t dev_panid;       //分组名称
+extern uint8_t s_pwr;            //0手动设置功率，1为自动功率设置
+extern uint64_t pwr_val;         //手动设置功率值
+extern uint8_t anchor_mode;      //0为从基站，1为主基站
+extern uint16_t sync_period;     //TDOA主基站同步时间（ms）
+extern uint16_t range_period;    //基站自标定时间周期（ms）
+extern uint8_t resp_slot;        //TWR定位基站返回序号(1-4) 隧道号
+extern uint8_t dev_speed;        //SPI速率
+extern uint8_t dev_channel;      //信道2为3.993G，信道5为6.489G；
+extern double dwt_prq_dealy_16m; //天线延时
+extern uint8_t cm_led;
+//----------
+
 typedef struct dw1000_usr_test
 {
   uint8_t code;
