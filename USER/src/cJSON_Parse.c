@@ -21,9 +21,6 @@
 #include "eeprom_var.h"
 #include "dw1000_usr.h"
 
-#define SUCCESS 0
-#define FAILURE -1
-
 /******************************************************************************
 //parse uart command
 ******************************************************************************/
@@ -33,7 +30,7 @@ int Parse_UartCmd(char *Cmd_buf)
 
   if (NULL == Cmd_buf) //null
   {
-    return FAILURE;
+    return RT_ERROR;
   }
 
   cJSON *pJson = cJSON_Parse(Cmd_buf); //parse json data
@@ -41,7 +38,7 @@ int Parse_UartCmd(char *Cmd_buf)
   {
     cJSON_Delete(pJson); //delete pJson
 
-    return FAILURE;
+    return RT_ERROR;
   }
 
   cJSON *pSub = cJSON_GetObjectItem(pJson, "Command"); //"Command"
@@ -49,97 +46,104 @@ int Parse_UartCmd(char *Cmd_buf)
   {
     if (!strcmp((char const *)pSub->valuestring, "SetupProduct")) //Command:SetupProduct
     {
-      Empty_eeprom(AT24C08_ADDR_P0);
+      // Empty_eeprom(AT24C08_ADDR_P0);
       rt_kprintf(" Begin SetupProduct, now empty eeprom!!!\n");
 
       pSub = cJSON_GetObjectItem(pJson, "PanId"); //"PanId"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse PanId:%s\n", pSub->valuestring);
+        rt_kprintf("json parse PanId:%  --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_PANID_ADDR, pSub->valuestring, 6);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "Address"); //"Address"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse Address:%s\n", pSub->valuestring);
-        at24_write(AT24C08_ADDR_P0, DEV_ADD_STR_ADDR, pSub->valuestring, 4);
+        rt_kprintf("json parse Address:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
+        at24_write(AT24C08_ADDR_P0, DEV_ADD_STR_ADDR, pSub->valuestring, rt_strlen(pSub->valuestring));
         // osi_at24c08_write(DEVICE_ADDR_ADDR, (uint16_t)strtoul(pSub->valuestring, 0, 16));
       }
 
       pSub = cJSON_GetObjectItem(pJson, "Channel"); //"Channel"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse Channel:%s\n", pSub->valuestring);
+        rt_kprintf("json parse Channel:%s  --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         // osi_at24c08_write_byte(DEVICE_CHANNEL_ADDR, (uint8_t)pSub->valueint);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "Speed"); //"Speed"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse Speed:%s\n", pSub->valuestring);
+        rt_kprintf("json parse Speed:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         // osi_at24c08_write_byte(DEVICE_SPEED_ADDR, (uint8_t)pSub->valueint);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "cm_led"); //"cm_led"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse cm_led:%s\n", pSub->valuestring);
+        rt_kprintf("json parse cm_led:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_CM_LED, pSub->valuestring, 1);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "s_pwr"); //"s_pwr"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse s_pwr:%s\n", pSub->valuestring);
+        rt_kprintf("json parse s_pwr:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_S_PER, pSub->valuestring, 1);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "pwr_val"); //"pwr_val"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse Address:%s\n", pSub->valuestring);
+        rt_kprintf("json parse Address:%s  --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_PER_VAL, pSub->valuestring, 10);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "Host_Anchor"); //"Host_Anchor"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse Host_Anchor:%s\n", pSub->valuestring);
+        rt_kprintf("json parse Host_Anchor:%s  --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_ANCHOR_MODE, pSub->valuestring, 1);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "RespSlot"); //"RespSlot"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse RespSlot:%s\n", pSub->valuestring);
+        rt_kprintf("json parse RespSlot:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_RESP_SLOT, pSub->valuestring, 1);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "SyncPeriod"); //"SyncPeriod"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse SyncPeriod:%s\n", pSub->valuestring);
+        rt_kprintf("json parse SyncPeriod:%s  --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_SYNC_PERIOD, pSub->valuestring, 5);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "range_period"); //"range_period"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse range_period:%s\n", pSub->valuestring);
+        rt_kprintf("json parse range_period:%s  --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_RANG_PERIOD, pSub->valuestring, 5);
       }
 
       pSub = cJSON_GetObjectItem(pJson, "prq_delay"); //"prq_delay"
       if (NULL != pSub)
       {
-        rt_kprintf("json parse prq_delay:%s\n", pSub->valuestring);
+        rt_kprintf("json parse prq_delay:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
         at24_write(AT24C08_ADDR_P0, DEV_PRQ_DELAY, pSub->valuestring, 10);
+      }
+
+      pSub = cJSON_GetObjectItem(pJson, "server_ip"); // "prq_delay"
+      if (NULL != pSub)
+      {
+        rt_kprintf("json parse server_ip:%s --slen:%d\n", pSub->valuestring, rt_strlen(pSub->valuestring));
+        at24_write(AT24C08_ADDR_P0, SERVER_IP_ADDR, pSub->valuestring, 16);
       }
 
       cJSON_Delete(pJson); //delete pJson
 
-      return SUCCESS;
+      return RT_EOK;
     }
     // else if (!strcmp((char const *)pSub->valuestring, "ReadProduct")) //Command:ReadProduct
     // {
@@ -187,7 +191,7 @@ int Parse_UartCmd(char *Cmd_buf)
   }
   cJSON_Delete(pJson); //delete pJson
 
-  return FAILURE;
+  return RT_ERROR;
 }
 
 /*******************************************************************************
@@ -255,7 +259,13 @@ void uart_cmd(int argc, char *argv[])
   rt_kprintf("argc:%d \n", argc, argv[1]);
   if (argc == 2)
   {
-    Parse_UartCmd(argv[1]);
+    // Parse_UartCmd(argv[1]);
+    if (Parse_UartCmd(argv[1]) == RT_EOK)
+    {
+      rt_kprintf("uart set ok , now reboot!");
+      rt_thread_delay(1000);
+      rt_hw_cpu_reset();
+    }
   }
   else
   {

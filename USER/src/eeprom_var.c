@@ -24,78 +24,93 @@
 
 // at24cxx_device_t dev = RT_NULL;
 
+char server_ip[16];
+// char APP_VERSION[10]; //vxx.xx.xx
+
 void AT24_READ_DEV_SET(void)
 {
-    char dev_panid_str[6];
-    char s_pwr_str[1];
-    char pwr_val_str[10];
-    char anchor_mode_str[1];
-    char sync_period_str[5];
-    char range_period_str[5];
-    char resp_slot_str[5];
-    char dwt_prq_dealy_16m_str[10];
-    char cm_led_str[1];
+    char *read_temp;
+    // char dev_panid_str[6];
+    // char s_pwr_str[1];
+    // char pwr_val_str[10];
+    // char anchor_mode_str[1];
+    // char sync_period_str[5];
+    // char range_period_str[5];
+    // char resp_slot_str[5];
+    // char dwt_prq_dealy_16m_str[10];
+    // char cm_led_str[1];
 
     at24_read(AT24C08_ADDR_P0, DEV_ADD_STR_ADDR, dev_address_str, 5);
-    // rt_kprintf("dev_address_str:%s\n", dev_address_str);
     sscanf(dev_address_str, "%x", &dev_address);
+    rt_kprintf("dev_address_str:%04x\n", dev_address);
+    rt_memset(read_temp, 0, 5);
 
-    at24_read(AT24C08_ADDR_P0, DEV_PANID_ADDR, dev_panid_str, 6);
-    // rt_kprintf("dev_panid:%s\n", dev_panid_str);
-    sscanf(dev_panid_str, "%x", &dev_panid);
+    at24_read(AT24C08_ADDR_P0, DEV_PANID_ADDR, read_temp, 6);
+    sscanf(read_temp, "%x", &dev_panid);
+    rt_kprintf("dev_panid:%04x\n", dev_panid);
+    rt_memset(read_temp, 0, 6);
 
-    at24_read(AT24C08_ADDR_P0, DEV_S_PER, s_pwr_str, 1);
-    // rt_kprintf("s_pwr:%s\n", s_pwr_str);
-    sscanf(s_pwr_str, "%d", &s_pwr);
+    at24_read(AT24C08_ADDR_P0, DEV_S_PER, read_temp, 1);
+    sscanf(read_temp, "%d", &s_pwr);
+    rt_kprintf("s_pwr:%d\n", s_pwr);
+    rt_memset(read_temp, 0, 1);
 
-    at24_read(AT24C08_ADDR_P0, DEV_PER_VAL, pwr_val_str, 10);
-    // rt_kprintf("pwr_val:%s\n", pwr_val_str);
-    sscanf(pwr_val_str, "%x", &pwr_val);
+    at24_read(AT24C08_ADDR_P0, DEV_PER_VAL, read_temp, 10);
+    sscanf(read_temp, "%x", &pwr_val);
+    rt_kprintf("pwr_val:%08x\n", pwr_val);
+    rt_memset(read_temp, 0, 10);
 
-    at24_read(AT24C08_ADDR_P0, DEV_ANCHOR_MODE, anchor_mode_str, 1);
-    // rt_kprintf("anchor_mode:%s\n", anchor_mode_str);
-    sscanf(anchor_mode_str, "%d", &anchor_mode);
+    at24_read(AT24C08_ADDR_P0, DEV_ANCHOR_MODE, read_temp, 1);
+    sscanf(read_temp, "%d", &anchor_mode);
+    rt_kprintf("anchor_mode:%d\n", anchor_mode);
+    rt_memset(read_temp, 0, 1);
 
-    at24_read(AT24C08_ADDR_P0, DEV_SYNC_PERIOD, sync_period_str, 5);
-    // rt_kprintf("sync_period:%s\n", sync_period_str);
-    sscanf(sync_period_str, "%d", &sync_period);
+    at24_read(AT24C08_ADDR_P0, DEV_SYNC_PERIOD, read_temp, 5);
+    sscanf(read_temp, "%d", &sync_period);
+    rt_kprintf("sync_period:%d\n", sync_period);
+    rt_memset(read_temp, 0, 5);
 
-    at24_read(AT24C08_ADDR_P0, DEV_RANG_PERIOD, range_period_str, 5);
-    // rt_kprintf("range_period:%s\n", range_period_str);
-    sscanf(range_period_str, "%d", &range_period);
+    at24_read(AT24C08_ADDR_P0, DEV_RANG_PERIOD, read_temp, 5);
+    sscanf(read_temp, "%d", &range_period);
+    rt_kprintf("range_period:%d\n", range_period);
+    rt_memset(read_temp, 0, 5);
 
-    at24_read(AT24C08_ADDR_P0, DEV_RESP_SLOT, resp_slot_str, 1);
-    // rt_kprintf("resp_slot:%s\n", resp_slot_str);
-    sscanf(resp_slot_str, "%d", &resp_slot);
+    at24_read(AT24C08_ADDR_P0, DEV_RESP_SLOT, read_temp, 1);
+    sscanf(read_temp, "%d", &resp_slot);
+    rt_kprintf("resp_slot:%d\n", resp_slot);
+    rt_memset(read_temp, 0, 1);
 
-    at24_read(AT24C08_ADDR_P0, DEV_PRQ_DELAY, dwt_prq_dealy_16m_str, 10);
-    // rt_kprintf("dwt_prq_dealy_16m:%s\n", dwt_prq_dealy_16m_str);
-    dwt_prq_dealy_16m = strtod(dwt_prq_dealy_16m_str, RT_NULL);
+    at24_read(AT24C08_ADDR_P0, DEV_PRQ_DELAY, read_temp, 10);
+    dwt_prq_dealy_16m = strtod(read_temp, RT_NULL);
+    rt_kprintf("dwt_prq_dealy_16m:%s\n", read_temp);
+    rt_memset(read_temp, 0, 10);
 
     // sscanf(read_temp, "%d", &dwt_prq_dealy_16m);
 
-    at24_read(AT24C08_ADDR_P0, DEV_CM_LED, cm_led_str, 1);
-    // rt_kprintf("cm_led:%s\n", cm_led_str);
-    sscanf(cm_led_str, "%d", &cm_led);
+    at24_read(AT24C08_ADDR_P0, DEV_CM_LED, read_temp, 1);
+    sscanf(read_temp, "%d", &cm_led);
+    rt_kprintf("cm_led:%d\n", cm_led);
+    rt_memset(read_temp, 0, 1);
 
-    rt_kprintf(" dev_address:%04x \n\
-                 dev_panid=%04x \n \
-                 s_pwr:%d \n\
-                 pwr_val:%08x \n \
-                 anchor_mode:%d \n \
-                 sync_period:%d\n\
-                 range_period:%d\n\
-                 resp_slot:%d\n\
-                 cm_led:%d\n",
-               dev_address,
-               dev_panid,
-               s_pwr,
-               pwr_val,
-               anchor_mode,
-               sync_period,
-               range_period,
-               resp_slot,
-               cm_led);
+    at24_read(AT24C08_ADDR_P0, SERVER_IP_ADDR, server_ip, 16);
+    uint16_t a, b, c, d;
+    if (sscanf(server_ip, "%d.%d.%d.%d", &a, &b, &c, &d) == 4 &&
+        a >= 0 && a <= 255 &&
+        b >= 0 && b <= 255 &&
+        c >= 0 && c <= 255 &&
+        d >= 0 && d <= 255)
+    {
+        rt_sprintf(server_ip, "%d.%d.%d.%d", a, b, c, d); //把格式化的数据写入字符串
+        rt_kprintf("server_ip:%s\n", server_ip);
+    }
+    else
+    {
+        rt_memset(server_ip, 0, 16);
+        // server_ip = RT_NULL;
+        rt_kprintf("server_ip err! LEN:%d\n", strlen(server_ip));
+    }
+
+    rt_free(read_temp);
 }
 
 /******************************************************************************

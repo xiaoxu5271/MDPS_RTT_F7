@@ -97,9 +97,6 @@
 #define RT_USING_PIN
 #define RT_USING_MTD_NOR
 #define RT_USING_RTC
-#define RTC_SYNC_USING_NTP
-#define RTC_NTP_FIRST_SYNC_DELAY 50
-#define RTC_NTP_SYNC_PERIOD 3600
 #define RT_USING_SPI
 #define RT_USING_SFUD
 #define RT_SFUD_USING_SFDP
@@ -254,11 +251,6 @@
 #define RW007_RST_PIN 48
 #define PKG_USING_NETUTILS
 #define PKG_NETUTILS_TFTP
-#define PKG_NETUTILS_NTP
-#define NETUTILS_NTP_TIMEZONE 8
-#define NETUTILS_NTP_HOSTNAME "ntp.rt-thread.org"
-#define NETUTILS_NTP_HOSTNAME2 "cn.ntp.org.cn"
-#define NETUTILS_NTP_HOSTNAME3 "edu.ntp.org.cn"
 #define PKG_NETUTILS_TELNET
 #define PKG_USING_NETUTILS_LATEST_VERSION
 
@@ -344,8 +336,6 @@
 #define BSP_USING_I2C1
 #define BSP_I2C1_SCL_PIN 22
 #define BSP_I2C1_SDA_PIN 23
-#define BSP_USING_ONCHIP_RTC
-#define BSP_RTC_USING_LSE
 
 /* Board extended module Drivers */
 

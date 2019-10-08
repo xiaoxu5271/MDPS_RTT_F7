@@ -635,7 +635,7 @@ static void print_task(void *p)
 
             // if (strcmp(s_addr_tem, "0302") == 0)
             // if (p_Msg.msg_type == 4)
-            // rt_kprintf("%s\n", uart_send.buf);
+            rt_kprintf("%s\n", uart_send.buf);
             // rt_kprintf("msg_send:%s\n", msg_send.buf);
             rt_mq_send(&message_send, (void *)&msg_send, sizeof(msg_send));
         }

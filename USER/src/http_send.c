@@ -12,12 +12,13 @@
 #include <cJSON.h>
 #include "net_app.h"
 #include <rtdbg.h>
+#include "eeprom_var.h"
 
 #define GET_HEADER_BUFSZ 1024
 #define GET_REV_BUF_SIZE 1024
 
 //http用参数
-uint8_t http_ip[16] = "192.168.1.8";
+// uint8_t http_ip[16] = "192.168.1.8";
 uint8_t http_port[5] = "8080";
 uint8_t http_heart_uri[64]; //"http://192.168.1.8:8080/netlog?data="
 uint8_t http_noresp_uri[64];
@@ -132,7 +133,7 @@ void http_get_task(void *arg)
     char url_tick[600];
     static rt_err_t result;
 
-    rt_snprintf(http_heart_uri, sizeof(http_heart_uri), "http://%s:%s/netlog?data=", http_ip, http_port);
+    rt_snprintf(http_heart_uri, sizeof(http_heart_uri), "http://%s:%s/netlog?data=", server_ip, http_port);
     // cmd_return_str(data);
     // sprintf(url_cmd_return, "%s%s", test_uri, data);
     // cmd_devid_str(data);
@@ -176,7 +177,7 @@ void noresp_get_task(void *arg)
     uint16_t sleep_time = 400; //延时时间 ms
     int ret = 0;
     int len;
-    rt_snprintf(http_noresp_uri, sizeof(http_noresp_uri), "http://%s:%s/nolist?serial=%s", http_ip, http_port, dev_address_str);
+    rt_snprintf(http_noresp_uri, sizeof(http_noresp_uri), "http://%s:%s/nolist?serial=%s", server_ip, http_port, dev_address_str);
     rt_kprintf("http_noresp_uri:\n%s\n", http_noresp_uri);
     while (1)
     {
